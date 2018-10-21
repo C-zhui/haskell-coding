@@ -1,4 +1,3 @@
-
 qs :: (Ord a) => [a] -> [a]
 qs al@(x:_:_) = qs (filter (<x) al) ++ (filter(==x) al ) ++ qs (filter(>x) al )
 qs a = a
@@ -130,8 +129,6 @@ scanr' f acc (x:xs) =
 aaa = takeWhile (<1000) $scanl (+) 0 ( map sqrt [1..] )
 
 
-
-
 -- $ 函数应用符，以中缀表达式来接收参数，左边是一个函数f，右边是一个任意的参数x，使用f来应用x，即 f x，用于将函数与参数分开，减少()的使用
 -- map ($ 3) [(4+),(10*),(^2),sqrt]
 
@@ -152,3 +149,8 @@ sss' = foldl (+) 0
 flipv:: (a->b->c)->b->a->c
 flipv f = \x y -> f y x
 
+
+
+fl :: (a->x->a) -> a -> [x]->a
+fl f acc [] = acc
+fl f acc (x:xs) = fl f (f acc x) xs 

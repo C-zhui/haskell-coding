@@ -9,24 +9,6 @@ def qs(arr):  # 快速排序
 ''
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def qsg(arr):  # 生成器的 快速排序
     if len(arr) == 0:
         return
@@ -44,7 +26,9 @@ def qsg(arr):  # 生成器的 快速排序
     yield from qsg(gt)
     return
 
+
 ''
+
 
 def take(n, iterable):
     i = 0
@@ -59,9 +43,8 @@ def take(n, iterable):
     finally:
         return res
 
+
 ''
-
-
 
 
 import time
