@@ -1,4 +1,5 @@
+import Graphics.UI.SDL
+
+
 main = do
-    line <- fmap reverse getLine
-    putStr $ line
-   
+    getTicks >>= print
