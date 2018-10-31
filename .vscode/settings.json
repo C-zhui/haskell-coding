@@ -1,6 +1,6 @@
 {
     "ghcSimple.workspaceType": "bare",
-    "python.pythonPath": "/usr/bin/python3",
+    "python.pythonPath": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
     "editor.highlightActiveIndentGuide": false,
     "editor.renderIndentGuides": false
 }
