@@ -1,0 +1,3 @@
+:m + Data.List Data.Char
+
+:set prompt "ghci> "

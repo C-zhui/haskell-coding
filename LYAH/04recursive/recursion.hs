@@ -88,8 +88,8 @@ mergeTwoByTwo (xs:ys:xss) =
 mergeTwoByTwo a = a
 
 mergeAll ::(Ord a)=>[[a]]->[a]
-mergeAll allElem@(xs:ys:xss) = mergeAll (mergeTwoByTwo allElem)
-mergeAll [xs] = xs 
+mergeAll [xs] = xs
+mergeAll allElem@(_:_:_) = mergeAll (mergeTwoByTwo allElem)
 mergeAll [] = []
 
 mergeSort ::(Ord a)=>[a]->[a]
