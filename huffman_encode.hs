@@ -5,106 +5,69 @@
     3. 重复2 直到只剩下 一个节点，即完成编码
 -- -}
 import Data.List
+import Data.Ord
 
 data HFM_node = 
-    None_node | 
-    HFM_node {
-        weight::Double,
+    Leaf{
         tag ::String,
-        left_node ::HFM_node,
-        right_node ::HFM_node
-    }   deriving(Show,Eq,Ord)
+        weight::Double
+    }
+    |Branch {
+        weight::Double,
+        left ::HFM_node,
+        right ::HFM_node
+    }   deriving(Show)
 
--- 插入
-ins:: (Ord a) => a -> [a]->(a->a->Bool) ->[a]
-ins a [] _ = [a]
-ins a xAll@(x:xs) cmp
-    | a `cmp` x == True = a:xAll
-    | otherwise = x:ins a xs cmp
+-- 建树
+hTree :: [HFM_node]->HFM_node
+hTree (n:[]) = n
+hTree (x:y:xs) = hTree (insertBy (comparing weight) (Branch (weight x + weight y) x y) xs)
+hTree [] = error "Non solution"
+
+-- 序列化 
+serialize :: HFM_node->[(Double,String,String)]
+serialize (Leaf t w) = [(w,t,"")]
+serialize (Branch _ l r) = [(w,t,'0':code)|(w,t,code)<-serialize l] ++ [(w,t,'1':code)|(w,t,code)<-serialize r]
 
 -- 输入转换HFM_node
 lineToNode::String -> HFM_node
-lineToNode = (\ (x:y:_) -> HFM_node (read y::Double)  x  None_node  None_node) . words
+lineToNode = (\ (x:y:_) -> Leaf x (read y::Double)) . words
 
 readDataToNode :: String -> [HFM_node]
 readDataToNode = map  lineToNode . lines
 
--- 建树
-reduceToOne :: [HFM_node]-> HFM_node
-reduceToOne [] = error "at least give me one!"
-reduceToOne [one] = one
-reduceToOne (x:y:xs) = 
-    let newnode = HFM_node  (weight x + weight y) ""  x y 
-        in reduceToOne (ins newnode xs (<))
-    
--- 打印树
-printTree::HFM_node->IO()
-printTree n = do
-    printNode n 0
-    where 
-        printNode :: HFM_node -> Int -> IO()
-        printNode None_node _ = return ()
-        printNode n d  
-            | tag n /= "" = do -- 叶子
-                putStrLn (" : " ++ tag n)
-            | otherwise = do -- 分支
-                printLR n (d)
+-- 转换树为编码
+huffman :: [HFM_node]->[(Double,String,String)]
+huffman  =  sortBy (comparing (negate . (\(x,_,_)->x))) . serialize . hTree . (sortBy (comparing weight)) 
 
-        printLR :: HFM_node ->Int -> IO()
-        printLR n d = do
-            putStr "0 "
-            printNode (left_node n ) (d+2)
-            putStr (replicate d ' ')
-            putStr "1 "
-            printNode (right_node n) (d+2)
+-- 计算带权长度
+getAvgLen :: [(Double,String,String)]->Double
+getAvgLen = sum . map (\(w,_,code)-> w * fromIntegral (length code))
 
--- 计算平均长度
-getAverageLen :: HFM_node -> Double
-getAverageLen None_node = 0
-getAverageLen n = getavg n 0
-    where 
-        getavg :: HFM_node -> Int ->Double
-        getavg n d 
-            | tag n /= "" = (weight n )*(fromIntegral d)
-            | otherwise = 
-                let leftres = getavg (left_node n) (d+1);
-                       rightres = getavg (right_node n) (d+1)
-                in leftres +  rightres 
-
-getInformationentropy::HFM_node -> Double
-getInformationentropy None_node = 0
-getInformationentropy n 
-    | tag n /= "" = negate ( weight n) * logBase 2 (weight n)
-    | otherwise = getInformationentropy (left_node n) + getInformationentropy (right_node n) 
+-- 计算信息熵
+getInfoEntropy :: [(Double,String,String)]->Double
+getInfoEntropy = sum . map (\(w,_,_) -> negate $ w * (logBase 2 w))
 
 main :: IO()
 main = do
     s <- readFile "data.txt"    
-    let 
-        nodeArr = readDataToNode s
-        tree = reduceToOne ( sort nodeArr )
-        avgLen = getAverageLen tree
-        infoEntropy = getInformationentropy tree
-        redundence = (1-infoEntropy/avgLen)
-    printTree tree
+    let nodeArr = readDataToNode s
+        hfm = huffman nodeArr
+        avgLen = getAvgLen hfm
+        infoEntropy = getInfoEntropy hfm
+        redundence = 1 - infoEntropy / avgLen
+    print nodeArr
+    putStrLn " "
+    print hfm
+    putStrLn " "
     putStr "the weighted average length is :"
     print   avgLen
+    putStrLn " "
     putStr "the  Informationentropy is : "
     print  infoEntropy
+    putStrLn " "
     putStr "the  redundence is : "
     print $ redundence
-    
-{-
-    printArrLineByLine ::(Show a)=> [a] -> IO()
-    printArrLineByLine [] = return ()
-    printArrLineByLine (x:xs) = do
-    print x
-    printArrLineByLine xs
--- -}
+    print $ sum . map (weight) $ nodeArr
 
-{-
-instance Eq HFM_node where 
-    a == b = weight a == weight b
-instance Ord HFM_node where 
-    a <= b = weight a <= weight b
--- -}
+

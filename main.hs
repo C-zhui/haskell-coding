@@ -1,28 +1,55 @@
 import Data.List as L
+import Data.Char as C
+break' :: (a->Bool)->[a]->([a],[a])
+break' f xss = 
+    let (xs,ys) = b f [] xss
+        in (reverse xs,ys)
+    where 
+        b :: (a->Bool)->[a]->[a]->([a],[a])
+        b _ xs [] = (xs,[])
+        b bf xs (y:ys) = if bf y then (xs,y:ys) else b bf (y:xs) ys
 
-f :: (Integral a) => a-> a
-f 0 = 1
-f n = n * (f (n-1))
+splitLines :: String -> [String]
+splitLines [] = []
+splitLines ss = 
+    let (xs,ys) = break' isLineTerminate ss
+        in xs : case ys of 
+            ('\r':'\n':rest) -> splitLines rest
+            ('\r':rest)      -> splitLines rest
+            ('\n':rest)      -> splitLines rest
+            _                -> []
+    where 
+        isLineTerminate c = c=='\r' || c=='\n'
 
-qs :: (Ord a) => [a] -> [a]
-qs [] = []
-qs (x:xs) = qs (filter (<x) xs) ++ [x] ++ qs (filter (>=x) xs)
+splitWords :: String -> [String]
+splitWords [] = []
+splitWords ss
+    | isWhitespace (head ss) = splitWords . tail $ ss
+    | otherwise = 
+        let (xs,ys) = break' isWhitespace ss
+        in xs : splitWords ys
+    where 
+        isWhitespace c = c==' ' || c=='\t' || c=='\n' || c=='\r'
 
-empty :: [a] -> Bool
-empty (x:a) = False
-empty _ = True
 
-square :: Int -> Int
-square x = x * x
+-- (|>) ::a->(a->c)->c 
+(|>) = flip ($)
 
-primes::[Integer]
-primes = getPrimes [2..]
-    where getPrimes (p:xs) = p: getPrimes [x|x<-xs ,x `mod` p/=0]
+a = 1.0 |> (*2)
 
-a = take 10000 primes
+
+arr::Int
+arr = 
+    let a = L.foldl' (+) 0 [1..200000000]
+        in seq a (a+1)
+
+append :: [a] -> [a] -> [a]
+append x y = foldr (:) y x
+
+concat' :: [[a]] -> [a]
+concat' [] = []
+concat' xss = foldr (++) [] xss
 
 main = do
-    print $ a !! 99
-
-
- 
+    line <- getLine 
+    print . map C.ord $ line
