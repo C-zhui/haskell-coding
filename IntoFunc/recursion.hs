@@ -82,15 +82,23 @@ merge (x:xs) (y:ys)
  | x < y = x:merge xs (y:ys)
  | otherwise = y:merge (x:xs) ys
 
-
 mergeTwoByTwo :: (Ord a)=>[[a]]->[[a]]
 mergeTwoByTwo (xs:ys:xss) = 
  merge xs ys :mergeTwoByTwo xss
 mergeTwoByTwo a = a
 
 mergeAll ::(Ord a)=>[[a]]->[a]
-mergeAll [xs] = xs
 mergeAll allElem@(xs:ys:xss) = mergeAll (mergeTwoByTwo allElem)
+mergeAll [xs] = xs 
+mergeAll [] = []
 
 mergeSort ::(Ord a)=>[a]->[a]
 mergeSort  = mergeAll . sequences
+
+
+nature :: [Integer]
+nature = 0:map (+1) nature
+
+fib ::[Integer]
+fib = 0:1:zipWith (+) fib (tail fib)
+
